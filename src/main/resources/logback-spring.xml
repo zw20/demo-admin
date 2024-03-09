@@ -1,0 +1,45 @@
+<!-- 日志配置文件加载顺序： logback.xml → application.properties(yml) → logback-spring.xml -->
+<!-- 官方推荐使用logback-spring.xml，因此它晚于application.properties(yml)加载，可以获得application.properties(yml)定义的变量 -->
+<configuration scan="true" scanPeriod="60 seconds" debug="false">
+
+    <!-- 保留日志的天数 -->
+    <property name="RETAINED_FILE_DAYS" value="30"/>
+    <!-- 同类日志占用的总空间大小（多天总和），超过将被删除 -->
+    <property name="TOTAL_SIZE_CAP" value="50MB"/>
+    <property name="log_pattern" value="%yellow(%d{yyyyMMdd HH:mm:ss.SSS,Asia/Shanghai}) %highlight(%-5level) %boldWhite([%-10thread]) %cyan(%logger{50}) %white(%msg) %n"/>
+    <property name="file_pattern" value="applog/$%d{yyyyMMdd}/%d{yyyyMMdd}.%i.log"/>
+    <!-- 为后面引用打下基础，先按类别定义日志appender：控制台 -->
+    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>${log_pattern}</pattern>
+            <charset>UTF-8</charset>
+        </encoder>
+    </appender>
+
+    <!-- 生成日志文件 -->
+    <appender name="LOGFILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+<!--        <Predent>true</Predent>-->
+        <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+            <FileNamePattern>applog/$%d{yyyyMMdd}/%d{yyyyMMdd}.%i.log</FileNamePattern>
+            <MaxHistory>30</MaxHistory>
+            <totalSizeCap>50MB</totalSizeCap>
+            <maxFileSize>50MB</maxFileSize>
+        </rollingPolicy>
+        <layout class="ch.qos.logback.classic.PatternLayout">
+            <Pattern>
+                %d{yyyyMMdd HH:mm:ss.SSS} [%-10thread] %logger{36} -%msg%n
+            </Pattern>
+        </layout>
+    </appender>
+
+
+    <logger name="com.website"  additivity="false">
+        <appender-ref ref="CONSOLE"/>
+        <appender-ref ref="LOGFILE"/>
+    </logger>
+
+    <root level="INFO"> <!-- 大于等于此级别的日志才会输出 -->
+        <appender-ref ref="CONSOLE"/>
+        <appender-ref ref="LOGFILE"/>
+    </root>
+</configuration>
