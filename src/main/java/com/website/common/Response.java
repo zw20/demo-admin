@@ -1,4 +1,4 @@
-package com.website.Common;
+package com.website.common;
 
 import lombok.Data;
 
